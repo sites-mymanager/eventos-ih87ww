@@ -1,11 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="wb-allow-ai-styles" content="true">
-    <title>EventOS - The All-in-One Platform for Events & Tournaments</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The All-in-One Platform for Events & Tournaments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #1e40af;
+      --accent: #ef4444;
+      --background: #ffffff;
+      --text: #1f2937;
+      --font-heading: 'Inter', system-ui, sans-serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--background); color: var(--text); line-height: 1.7; }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; line-height: 1.3; margin-bottom: 1rem; }
+    h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+    h2 { font-size: clamp(2rem, 4vw, 3rem); }
+    h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+    p { margin-bottom: 1rem; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    section, .section { padding: 5rem 2rem; }
+    img { max-width: 100%; height: auto; }
+    a { color: var(--primary); text-decoration: none; transition: all 0.3s ease; }
+    button, .btn { display: inline-block; background: var(--primary); color: white; border: none; padding: 0.875rem 2rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+    button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .hero { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 6rem 2rem; text-align: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    /* Dynamic component styles */
+    .dynamic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; padding: 2rem; }
+    .dynamic-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .no-data { text-align: center; padding: 2rem; color: #6b7280; }
+    /* Grid variations */
+    .grid--3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .grid--2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
+    .grid--4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+    /* Section utilities */
+    .section__title { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+    .section__text { font-size: 1.125rem; color: #6b7280; max-width: 600px; margin: 0 auto 2rem; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 2rem; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: white; }
+    .btn-primary { background: var(--primary); color: white; }
+    /* Stagger animations */
+    .stagger > *:nth-child(1) { animation-delay: 0.1s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.2s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.3s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.4s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.5s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.6s; }
+    /* Navbar styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar-brand {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .navbar-nav {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .nav-link {
+      padding: 0.5rem 1rem;
+      color: var(--text);
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .nav-link:hover {
+      color: var(--primary);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .nav-link.active {
+      color: var(--primary);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .navbar-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .navbar-toggle span {
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s ease;
+    }
+    /* Offset body content for fixed navbar */
+    body {
+      padding-top: 72px;
+    }
+    /* Mobile navbar */
+    @media (max-width: 768px) {
+      .navbar-toggle {
+        display: flex;
+      }
+      .navbar-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: white;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+      .navbar-nav.show {
+        display: flex;
+      }
+      .nav-link {
+        width: 100%;
+        padding: 0.75rem 1rem;
+      }
+    }
+    
+    /* Collected styles from AI-generated content */
+    
         :root {
             --primary: #2563eb;
             --secondary: #1e40af;
@@ -739,11 +880,28 @@
                 font-size: 2rem;
             }
         }
-    </style>
+    
+  </style>
 </head>
-
-<section class="wb-section">
-    <div class="navbar">
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">EventOS</a>
+    <button class="navbar-toggle" onclick="this.nextElementSibling.classList.toggle('show')" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="navbar-nav">
+      <a href="#section-section-1-1" class="nav-link">Section 1</a>
+            <a href="#section-the-all-in-one-platform-for-events-tournaments-2" class="nav-link">The All-in-One Platform for Events & Tournaments</a>
+            <a href="#section-upcoming-events-tournaments-3" class="nav-link">Upcoming Events & Tournaments</a>
+            <a href="#section-features-4" class="nav-link">Features</a>
+            <a href="#section-everything-you-need-to-run-serious-competitions-5" class="nav-link">Everything You Need to Run Serious Competitions</a>
+            <a href="#section-frequently-asked-questions-6" class="nav-link">Frequently Asked Questions</a>
+            <a href="#section-eventos-7" class="nav-link">EventOS</a>
+    </div>
+  </nav>
+<div class="navbar">
         <a href="#" class="navbar-brand">EventOS</a>
         <ul class="navbar-nav">
             <li><a href="#" class="nav-link">Events</a></li>
@@ -756,10 +914,10 @@
         </ul>
     </div>
 
-    <div class="hero">
+<div class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <h1>The All-in-One Platform for Events & Tournaments</h1>
+                <h1>The All-in-One Platform for Events &amp; Tournaments</h1>
                 <p>A professional platform for tournaments, showcases, exhibitions, and structured competitions — across sports, performance, and beyond.</p>
                 <p>From martial arts and team sports to dance battles, fitness challenges, and judged events — this platform is built for any competition that demands structure, clarity, and real-time results.</p>
                 <a href="#" class="btn btn-primary">Create an Event or Tournament</a>
@@ -804,17 +962,56 @@
         </div>
     </div>
 
-    <div class="features">
+<section class="section" id="section-upcoming-events-tournaments-3">
+  <div class="container">
+    <h2 class="section__title text-center">Upcoming Events & Tournaments</h2>
+    <p class="section__text text-center">Discover and join exciting events happening near you</p>
+    <div class="grid grid--3" data-component="live-events" data-limit="6" data-upcoming="true">
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Event Title</h3>
+        <p class="card__text">Event details will appear here</p>
+      </div>
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Tournament Name</h3>
+        <p class="card__text">Tournament details will appear here</p>
+      </div>
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Competition Event</h3>
+        <p class="card__text">Competition details will appear here</p>
+      </div>
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Workshop Event</h3>
+        <p class="card__text">Workshop details will appear here</p>
+      </div>
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Community Event</h3>
+        <p class="card__text">Community event details will appear here</p>
+      </div>
+      <div class="card">
+        <div class="wb-loading" style="height: 200px; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6)); border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">Loading events...</div>
+        <h3 class="card__title">Special Tournament</h3>
+        <p class="card__text">Special tournament details will appear here</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="features">
         <div class="features-container">
             <h2>Features</h2>
-            <p class="features-subtitle">The All-in-One Platform for Events & Tournaments</p>
+            <p class="features-subtitle">The All-in-One Platform for Events &amp; Tournaments</p>
             
             <div class="feature-tabs">
-                <a href="#" class="feature-tab active">Registration & Entry</a>
-                <a href="#" class="feature-tab">Event Formats & Structure</a>
-                <a href="#" class="feature-tab">Live Scoring & Results</a>
-                <a href="#" class="feature-tab">Event Website & Public Pages</a>
-                <a href="#" class="feature-tab">Check-In & On-Site Control</a>
+                <a href="#" class="feature-tab active">Registration &amp; Entry</a>
+                <a href="#" class="feature-tab">Event Formats &amp; Structure</a>
+                <a href="#" class="feature-tab">Live Scoring &amp; Results</a>
+                <a href="#" class="feature-tab">Event Website &amp; Public Pages</a>
+                <a href="#" class="feature-tab">Check-In &amp; On-Site Control</a>
             </div>
 
             <div class="feature-content">
@@ -826,11 +1023,11 @@
                         </div>
                         <div class="division-section">
                             <div class="division-title">Youth Division</div>
-                            <div class="division-details">< 79 lbs | 79-95 lbs | 95-110 lbs | 111-130 lbs</div>
+                            <div class="division-details">&lt; 79 lbs | 79-95 lbs | 95-110 lbs | 111-130 lbs</div>
                         </div>
                         <div class="division-section">
                             <div class="division-title">Adult Novice Division</div>
-                            <div class="division-details">< 125 lbs | 125-155 lbs | 155+ lbs</div>
+                            <div class="division-details">&lt; 125 lbs | 125-155 lbs | 155+ lbs</div>
                         </div>
                         <div class="division-section">
                             <div class="division-title">Elite Division</div>
@@ -842,7 +1039,7 @@
                 </div>
                 <div class="feature-details">
                     <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; display: inline-block; font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">
-                        REGISTRATION & ENTRY MANAGEMENT
+                        REGISTRATION &amp; ENTRY MANAGEMENT
                     </div>
                     <h3>Run Registration With Precision — Not Guesswork</h3>
                     <p>EventOS gives you complete control over how competitors, teams, and organizations enter your competition — across any discipline or format.</p>
@@ -851,7 +1048,7 @@
                         <li>Multi-Entry Registration</li>
                         <li>Division-Based Entries</li>
                         <li>Approval-Based Workflows</li>
-                        <li>Paid, Free & Add-On Entries</li>
+                        <li>Paid, Free &amp; Add-On Entries</li>
                         <li>Clean, Guided Entry Flow</li>
                     </ul>
                     <a href="#" class="btn btn-primary">REQUEST A DEMO</a>
@@ -861,14 +1058,14 @@
             <div class="feature-content">
                 <div class="feature-details">
                     <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; display: inline-block; font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">
-                        EVENT FORMAT & STRUCTURE
+                        EVENT FORMAT &amp; STRUCTURE
                     </div>
                     <h3>Run Any Tournament or Event Format</h3>
                     <p>Bracket tournaments, live showcases, or judged competitions - mix formats into one comprehensive event.</p>
                     <ul class="feature-list">
                         <li>Bracket builder</li>
-                        <li>Showcases & Exhibitions</li>
-                        <li>Judging & Scoring</li>
+                        <li>Showcases &amp; Exhibitions</li>
+                        <li>Judging &amp; Scoring</li>
                     </ul>
                     <a href="#" class="btn btn-primary">REQUEST A DEMO</a>
                 </div>
@@ -888,9 +1085,9 @@
         </div>
     </div>
 
-    <div class="mobile-section">
+<div class="mobile-section">
         <div class="mobile-container">
-            <p style="font-size: 1rem; margin-bottom: 0.5rem;">The All-in-One Platform for Events & Tournaments</p>
+            <p style="font-size: 1rem; margin-bottom: 0.5rem;">The All-in-One Platform for Events &amp; Tournaments</p>
             <h2>Everything You Need to Run Serious Competitions</h2>
             <p>EventOS does it all. Streamline every stage of your competition with the only app designed for true multi-discipline, multi-format events.</p>
             <a href="#" class="btn" style="background: white; color: var(--primary);">REQUEST A DEMO</a>
@@ -903,90 +1100,7 @@
         </div>
     </div>
 
-    <div class="services">
-        <div class="services-container">
-            <h2>Built for Sports Events & Tournaments</h2>
-            <p>Everything you need to organize, register, and participate in sports events and tournaments</p>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">📊</div>
-                    <h3>Live Scoring & Results</h3>
-                    <p>Real-time scoring and results tracking for all competition formats</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">🏆</div>
-                    <h3>Real-time Updates</h3>
-                    <p>Keep participants and spectators informed with live updates</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">👥</div>
-                    <h3>Athlete & Team Profiles</h3>
-                    <p>Comprehensive profiles for athletes, teams, and organizations</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">📱</div>
-                    <h3>Divisions & Categories</h3>
-                    <p>Organize by age, weight, skill level, and custom categories</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">⚙️</div>
-                    <h3>Event Management</h3>
-                    <p>Complete event management from creation to completion</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">👤</div>
-                    <h3>Organizer Dashboards</h3>
-                    <p>Powerful dashboards for event organizers</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">📋</div>
-                    <h3>Check-in & Attendance</h3>
-                    <p>Streamlined check-in process for participants</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">📄</div>
-                    <h3>Rules & Documents</h3>
-                    <p>Upload and manage competition rules and documents</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="how-it-works">
-        <div class="how-it-works-container">
-            <h2>How It Works</h2>
-            <p>One platform. Every competition format. Built to scale.</p>
-            <div class="steps-grid">
-                <div class="step">
-                    <div class="step-number">01</div>
-                    <h3>Choose a Discipline</h3>
-                    <p>Select from sports, performance, fitness, skill-based, or judged competitions.</p>
-                    <p>If it has divisions, brackets, scoring, or results — it belongs here.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">02</div>
-                    <h3>Event or Tournament</h3>
-                    <p>Run events for showcases, exhibitions, and live experiences — or launch tournaments with brackets, rounds, divisions, and placements.</p>
-                    <p>Mix formats under one event when needed.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">03</div>
-                    <h3>Register, Participate, or Attend</h3>
-                    <p>Competitors, teams, organizations, and spectators register with clarity and confidence.</p>
-                    <p>Everything stays organized — before, during, and after the event.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">04</div>
-                    <h3>Watch Live. Track Results.</h3>
-                    <p>Stream live, publish real-time scores, and track outcomes instantly.</p>
-                    <p>From first performance to final standings — it's all connected.</p>
-                </div>
-            </div>
-            <a href="#" class="btn btn-accent">Create an Event or Tournament</a>
-        </div>
-    </div>
-
-    <div class="faq">
+<div class="faq">
         <div class="faq-container">
             <h2>Frequently Asked Questions</h2>
             <p class="faq-subtitle">Got questions? We've got answers.</p>
@@ -1010,18 +1124,6 @@
             </div>
         </div>
     </div>
-
-    <div class="newsletter">
-        <div class="newsletter-container">
-            <h3>Stay in the Game</h3>
-            <p>Get updates on events, tournaments, and community news</p>
-            <div class="newsletter-form">
-                <input type="email" placeholder="Enter your email" class="newsletter-input">
-                <button class="btn btn-accent">Subscribe</button>
-            </div>
-        </div>
-    </div>
-</section>
 
 <footer>
     <div class="footer-container">
@@ -1072,9 +1174,9 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2024 Sports Events & Tournaments Hub. All rights reserved.</p>
+            <p>© 2024 Sports Events &amp; Tournaments Hub. All rights reserved.</p>
         </div>
     </div>
 </footer>
-
+</body>
 </html>
