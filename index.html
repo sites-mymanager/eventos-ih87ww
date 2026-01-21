@@ -2293,6 +2293,163 @@
     </div>
 </footer>
 
+    
+
+    <!-- Dynamic Component Styles -->
+    <style>
+      /* Dynamic component container */
+      [data-component] {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        min-height: 200px;
+        transition: opacity 0.3s ease;
+      }
+
+      [data-component].loading {
+        opacity: 0.6;
+      }
+
+      [data-component].loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        margin: -20px 0 0 -20px;
+        border: 3px solid var(--color-border, #e5e7eb);
+        border-top-color: var(--color-primary, #3b82f6);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Dynamic cards */
+      .dynamic-card {
+        background: var(--color-surface, #fff);
+        border-radius: var(--radius-md, 16px);
+        overflow: hidden;
+        box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .dynamic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg, 0 10px 40px rgb(0 0 0 / 0.08));
+      }
+
+      .dynamic-card .card-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .dynamic-card .card-content {
+        padding: 1.25rem;
+      }
+
+      .dynamic-card .card-date,
+      .dynamic-card .card-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-primary, #3b82f6);
+        margin-bottom: 0.5rem;
+      }
+
+      .dynamic-card .card-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--color-text, #1f2937);
+      }
+
+      .dynamic-card .card-description {
+        font-size: 0.875rem;
+        color: var(--color-text-muted, #6b7280);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+      }
+
+      .dynamic-card .card-location,
+      .dynamic-card .card-schedule,
+      .dynamic-card .card-instructor,
+      .dynamic-card .card-duration {
+        display: block;
+        font-size: 0.8125rem;
+        color: var(--color-text-muted, #6b7280);
+        margin-bottom: 0.5rem;
+      }
+
+      .dynamic-card .card-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--color-text, #1f2937);
+        margin: 0.75rem 0;
+      }
+
+      .dynamic-card .card-price .price-period {
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: var(--color-text-muted, #6b7280);
+      }
+
+      .dynamic-card .card-features {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+        font-size: 0.875rem;
+      }
+
+      .dynamic-card .card-features li {
+        padding: 0.25rem 0;
+        color: var(--color-text-muted, #6b7280);
+      }
+
+      .dynamic-card .card-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: var(--color-primary, #3b82f6);
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-radius: var(--radius-sm, 8px);
+        text-align: center;
+        transition: background 0.2s ease, transform 0.2s ease;
+        margin-top: 0.5rem;
+      }
+
+      .dynamic-card .card-btn:hover {
+        background: var(--color-secondary, #2563eb);
+        transform: translateY(-2px);
+      }
+
+      /* Membership featured card */
+      .membership-card.featured {
+        border: 2px solid var(--color-primary, #3b82f6);
+        transform: scale(1.02);
+      }
+
+      /* No data / Error states */
+      .no-data, .error {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 2rem;
+        color: var(--color-text-muted, #6b7280);
+      }
+
+      .error {
+        color: #ef4444;
+      }
+    </style>
+
+
     <!-- WebBuilder Dynamic Hydration Script -->
     <script>
     (function() {
@@ -2305,6 +2462,8 @@
       const CONFIG = {
         fallbackApiBaseUrl: 'http://server-operator:5000',
         orgId: '69600bf2b068242822a051ca',
+        orgSubdomain: 'eventos',
+        appBaseUrl: 'https://eventos.mymanager.com',
         debug: true // Enable debug mode to help diagnose issues
       };
 
@@ -2319,6 +2478,7 @@
       console.log('[WebBuilder Hydration] Config:', CONFIG);
       console.log('[WebBuilder Hydration] Is GitHub Pages:', isGitHubPages);
       console.log('[WebBuilder Hydration] API Base URL:', CONFIG.apiBaseUrl);
+      console.log('[WebBuilder Hydration] App Base URL:', CONFIG.appBaseUrl);
       console.log('[WebBuilder Hydration] Org ID:', CONFIG.orgId);
 
       const API_URL = CONFIG.apiBaseUrl + '/api/webbuilder-public/' + CONFIG.orgId;
@@ -2343,29 +2503,202 @@
         return text.substring(0, maxLength).trim() + '...';
       };
 
-      // Component Renderers
+      // Helper: Get days left until event
+      const getDaysLeft = (dateStr) => {
+        if (!dateStr) return null;
+        const eventDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        eventDate.setHours(0, 0, 0, 0);
+        const diffTime = eventDate - today;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      };
+
+      // Helper: Format date range
+      const formatDateRange = (startStr, endStr) => {
+        if (!startStr) return '';
+        const start = new Date(startStr);
+        const end = endStr ? new Date(endStr) : null;
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        if (end && start.getTime() !== end.getTime()) {
+          if (start.getMonth() === end.getMonth()) {
+            return monthNames[start.getMonth()] + ' ' + start.getDate() + '-' + end.getDate();
+          }
+          return monthNames[start.getMonth()] + ' ' + start.getDate() + ' - ' + monthNames[end.getMonth()] + ' ' + end.getDate();
+        }
+        return monthNames[start.getMonth()] + ' ' + start.getDate();
+      };
+
+      // Helper: Format date and time
+      const formatDateTime = (dateStr) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) +
+               ' at ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      };
+
+      // Component Renderers - matching editor styles exactly
       const renderers = {
-        // Events component
-        // API returns { success: true, data: [...events] } where each event has:
-        // title, eventStartDate, eventEndDate, venue, description, image, eventBanner
+        // Events component - matches editor LiveCanvas.js renderer
         'live-events': (data, container) => {
           const events = Array.isArray(data) ? data : (data.data || data.events || []);
-          if (!events.length) {
-            container.innerHTML = '<p class="no-data">No upcoming events</p>';
-            return;
-          }
-          container.innerHTML = events.slice(0, 6).map(event => `
-            <div class="dynamic-card event-card">
-              ${(event.image || event.eventBanner) ? `<img src="${event.image || event.eventBanner}" alt="${event.title}" class="card-image">` : ''}
-              <div class="card-content">
-                <span class="card-date">${formatDate(event.eventStartDate || event.startDate)}</span>
-                <h3 class="card-title">${event.title || event.name}</h3>
-                <p class="card-description">${truncate(event.description, 120)}</p>
-                ${(event.venue || event.location) ? `<span class="card-location">📍 ${event.venue || event.location}</span>` : ''}
-                <a href="${event.registrationUrl || '#'}" class="card-btn">Register</a>
+          const filterOptions = data.filterOptions || null;
+
+          // Get display options from data attributes (with defaults)
+          const showBanner = container.dataset.showBanner !== 'false';
+          const showDaysLeft = container.dataset.showDaysLeft !== 'false';
+          const showDateRange = container.dataset.showDateRange !== 'false';
+          const showDateTime = container.dataset.showDateTime !== 'false';
+          const showLocation = container.dataset.showLocation !== 'false';
+          const showHost = container.dataset.showHost !== 'false';
+          const showFilters = container.dataset.showFilters !== 'false';
+          const showTabs = container.dataset.showTabs !== 'false';
+          const cardsPerRow = parseInt(container.dataset.cardsPerRow) || 3;
+          const currentTab = container.dataset.activeTab || 'upcoming';
+          const limit = parseInt(container.dataset.limit) || 12;
+
+          // Get saved filter values from data attributes
+          const savedFilters = {
+            locationId: container.dataset.filterLocationId || '',
+            country: container.dataset.filterCountry || '',
+            categoryId: container.dataset.filterCategoryId || '',
+            subcategoryId: container.dataset.filterSubcategoryId || '',
+            type: container.dataset.filterType || '',
+            leadSource: container.dataset.filterLeadSource || ''
+          };
+
+          // Helper to render event card
+          const renderEventCard = (event) => {
+            const startDate = event.start || event.eventStartDate || event.startDate;
+            const endDate = event.end || event.eventEndDate || event.endDate;
+            const daysLeft = getDaysLeft(startDate);
+            const location = event.venueName || event.venue || event.location || (event.eventAddress && event.eventAddress.name);
+            const host = event.hostName;
+            const eventId = event._id || event.id;
+            const isTournament = event.eventCategory === 'tournament';
+            // Use full app URL for event links so they work on custom domains
+            const eventPath = isTournament ? '/tournament-register/' + eventId : '/event-view/' + eventId;
+            const eventUrl = CONFIG.appBaseUrl + eventPath;
+
+            let daysLeftText = '';
+            if (daysLeft !== null && showDaysLeft) {
+              if (daysLeft < 0) daysLeftText = 'PAST EVENT';
+              else if (daysLeft === 0) daysLeftText = 'TODAY';
+              else if (daysLeft === 1) daysLeftText = '1 DAY LEFT';
+              else daysLeftText = daysLeft + ' DAYS LEFT';
+            }
+
+            return `
+            <a href="${eventUrl}" class="dynamic-card event-card" style="display: block; text-decoration: none; color: inherit; background: var(--card-bg, #ffffff); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 24px rgba(0,0,0,0.1)';">
+              ${showBanner ? `
+                <div style="position: relative; width: 100%; height: 200px; overflow: hidden;">
+                  ${event.eventBanner
+                    ? `<img src="${event.eventBanner}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover;">`
+                    : `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary, #3b82f6), var(--secondary, #8b5cf6));"></div>`}
+                  ${daysLeftText ? `<span style="position: absolute; top: 12px; right: 12px; background: var(--primary, #3b82f6); color: white; font-size: 0.7rem; font-weight: 700; padding: 6px 12px; border-radius: 20px; letter-spacing: 0.5px;">${daysLeftText}</span>` : ''}
+                  ${showDateRange ? `<div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 2rem 1rem 1rem; color: white;">
+                    <div style="font-size: 1.25rem; font-weight: 800; letter-spacing: 1px;">${formatDateRange(startDate, endDate)}</div>
+                  </div>` : ''}
+                </div>
+              ` : ''}
+              <div style="padding: 1.25rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 0.75rem 0; color: var(--text, #1f2937);">${event.title || event.name || 'Event'}</h3>
+                ${showDateTime ? `<p style="font-size: 0.875rem; color: var(--text-muted, #6b7280); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="opacity: 0.7;">📅</span> ${formatDateTime(startDate)}
+                </p>` : ''}
+                ${showLocation && location ? `<p style="font-size: 0.875rem; color: var(--text-muted, #6b7280); margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="opacity: 0.7;">📍</span> ${typeof location === 'string' ? location : location.name || ''}
+                </p>` : ''}
+                ${showHost && host ? `<p style="font-size: 0.875rem; color: var(--text-muted, #6b7280); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="opacity: 0.7;">👤</span> Hosted by ${host}
+                </p>` : ''}
               </div>
+            </a>
+          `;
+          };
+
+          // Build header with filters and tabs
+          const filterSelectStyle = 'padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.875rem; background: white; cursor: pointer; min-width: 140px; color: #374151;';
+          const filterLabelStyle = 'display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px;';
+          const filterGroupStyle = 'display: flex; flex-direction: column;';
+
+          const headerHtml = (showTabs || showFilters) ? `
+            <div class="events-header" style="display: block; width: 100%; margin-bottom: 2rem;">
+              ${showFilters && filterOptions ? `
+                <div class="events-filter-bar" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; margin-bottom: 1rem;">
+                  <div style="${filterGroupStyle}">
+                    <label style="${filterLabelStyle}">Location</label>
+                    <select class="events-filter" data-filter="locationId" data-label="Location" style="${filterSelectStyle}">
+                      <option value="" ${!savedFilters.locationId ? 'selected' : ''}>All Locations</option>
+                      ${(filterOptions.locations || []).map(l => '<option value="' + l.id + '" ' + (savedFilters.locationId === String(l.id) ? 'selected' : '') + '>' + l.label + '</option>').join('')}
+                    </select>
+                  </div>
+                  <div style="${filterGroupStyle}">
+                    <label style="${filterLabelStyle}">Country</label>
+                    <select class="events-filter" data-filter="country" data-label="Country" style="${filterSelectStyle}">
+                      <option value="" ${!savedFilters.country ? 'selected' : ''}>All Countries</option>
+                      ${(filterOptions.countries || []).map(c => '<option value="' + c + '" ' + (savedFilters.country === c ? 'selected' : '') + '>' + c + '</option>').join('')}
+                    </select>
+                  </div>
+                  <div style="${filterGroupStyle}">
+                    <label style="${filterLabelStyle}">Category</label>
+                    <select class="events-filter" data-filter="categoryId" data-label="Category" style="${filterSelectStyle}">
+                      <option value="" ${!savedFilters.categoryId ? 'selected' : ''}>All Categories</option>
+                      ${(filterOptions.categories || []).map(c => '<option value="' + c.id + '" ' + (savedFilters.categoryId === String(c.id) ? 'selected' : '') + '>' + c.label + '</option>').join('')}
+                    </select>
+                  </div>
+                </div>
+              ` : ''}
+              ${showTabs ? `
+                <div class="events-tabs" style="display: inline-flex; align-items: center; background: #f3f4f6; border-radius: 8px; padding: 4px;">
+                  <button class="events-tab ${currentTab === 'upcoming' ? 'active' : ''}" data-tab="upcoming" style="padding: 0.5rem 1rem; font-weight: 600; font-size: 0.875rem; border: none; border-radius: 6px; cursor: pointer; color: ${currentTab === 'upcoming' ? 'white' : '#6b7280'}; background: ${currentTab === 'upcoming' ? 'var(--primary, #3b82f6)' : 'transparent'}; transition: all 0.2s;">
+                    Upcoming
+                  </button>
+                  <button class="events-tab ${currentTab === 'past' ? 'active' : ''}" data-tab="past" style="padding: 0.5rem 1rem; font-weight: 600; font-size: 0.875rem; border: none; border-radius: 6px; cursor: pointer; color: ${currentTab === 'past' ? 'white' : '#6b7280'}; background: ${currentTab === 'past' ? 'var(--primary, #3b82f6)' : 'transparent'}; transition: all 0.2s;">
+                    Past
+                  </button>
+                </div>
+              ` : ''}
             </div>
-          `).join('');
+          ` : '';
+
+          // Calculate grid columns based on cardsPerRow
+          const gridCols = 'repeat(' + cardsPerRow + ', minmax(280px, 1fr))';
+
+          // Build events grid HTML
+          const eventsGridHtml = events.length ? `
+            <div class="events-grid" style="display: grid; grid-template-columns: ${gridCols}; gap: 1.5rem;">
+              ${events.slice(0, limit).map(renderEventCard).join('')}
+            </div>
+          ` : '<p class="no-data" style="text-align: center; padding: 2rem; color: #6b7280;">No events found</p>';
+
+          // Reset container styles and render content
+          container.style.display = 'block';
+          container.innerHTML = headerHtml + eventsGridHtml;
+
+          // Add event listeners for tabs
+          container.querySelectorAll('.events-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+              const newTab = this.dataset.tab;
+              container.dataset.activeTab = newTab;
+              container.classList.remove('loaded');
+              container.classList.add('loading');
+              // Re-fetch with new tab parameter
+              hydrateComponent(container);
+            });
+          });
+
+          // Add event listeners for filters
+          container.querySelectorAll('.events-filter').forEach(filter => {
+            filter.addEventListener('change', function() {
+              const filterKey = this.dataset.filter;
+              const attrName = 'filter' + filterKey.charAt(0).toUpperCase() + filterKey.slice(1);
+              container.dataset[attrName] = this.value;
+              container.classList.remove('loaded');
+              container.classList.add('loading');
+              hydrateComponent(container);
+            });
+          });
         },
 
         // Tournaments component
@@ -2515,13 +2848,73 @@
               </div>
             </div>
           `).join('');
+        },
+
+        // Sports Subcategories component - matches editor LiveCanvas.js renderer
+        'live-sports-subcategories': (data, container) => {
+          let subcategories = Array.isArray(data) ? data : (data.data || data.subcategories || []);
+          const cardsPerRow = parseInt(container.dataset.cardsPerRow) || 4;
+          const limit = parseInt(container.dataset.limit) || 12;
+          const selectedIds = (container.dataset.selectedSubcategories || '').split(',').filter(Boolean);
+
+          console.log('[WebBuilder Hydration] Rendering sports subcategories:', subcategories.length);
+
+          // Filter by selected subcategories if any are specified
+          if (selectedIds.length > 0) {
+            subcategories = subcategories.filter(sub => {
+              const subId = (sub.id || sub._id || sub.value || '').toString();
+              return selectedIds.includes(subId);
+            });
+          }
+
+          if (!subcategories.length) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #6b7280;"><span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🏆</span>No sports categories available.</p>';
+            return;
+          }
+
+          // Calculate grid columns based on cardsPerRow
+          const gridCols = 'repeat(' + cardsPerRow + ', minmax(200px, 1fr))';
+
+          container.style.display = 'grid';
+          container.style.gridTemplateColumns = gridCols;
+          container.style.gap = '1.5rem';
+
+          container.innerHTML = subcategories.slice(0, limit).map(sub => {
+            const name = sub.name || sub.label || 'Category';
+            const image = sub.image || sub.banner;
+            const icon = sub.icon;
+            const color = sub.color || '#3b82f6';
+            const subId = sub.id || sub._id || sub.value || '';
+
+            return `
+              <div class="dynamic-card sports-card" data-subcategory-id="${subId}" style="background: var(--card-bg, #ffffff); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 32px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)';">
+                <div style="position: relative; width: 100%; height: 140px; overflow: hidden;">
+                  ${image
+                    ? `<img src="${image}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">`
+                    : `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, ${color}, var(--secondary, #8b5cf6)); display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 3rem; color: white;">${icon || '🏆'}</span>
+                      </div>`
+                  }
+                </div>
+                <div style="padding: 1rem;">
+                  <h4 style="font-size: 1rem; font-weight: 600; margin: 0; color: var(--text, #1f2937);">${name}</h4>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
+      };
+
+      // Endpoint mapping for components that don't follow the live-{endpoint} pattern
+      const endpointMap = {
+        'live-sports-subcategories': 'event-subcategories'
       };
 
       // Fetch data and hydrate component
       async function hydrateComponent(container) {
         const componentType = container.dataset.component;
-        const endpoint = componentType.replace('live-', '');
+        // Use endpoint map if available, otherwise derive from component type
+        const endpoint = endpointMap[componentType] || componentType.replace('live-', '');
 
         if (!renderers[componentType]) {
           console.warn('Unknown component type:', componentType);
@@ -2534,14 +2927,59 @@
         // Build query params from data attributes
         const params = new URLSearchParams();
         if (container.dataset.limit) params.append('limit', container.dataset.limit);
-        if (container.dataset.upcoming === 'true') params.append('upcoming', 'true');
         if (container.dataset.featured === 'true') params.append('featured', 'true');
-        const queryString = params.toString() ? '?' + params.toString() : '';
 
+        // Handle events-specific parameters
+        if (componentType === 'live-events') {
+          const activeTab = container.dataset.activeTab || 'upcoming';
+          if (activeTab === 'upcoming') {
+            params.append('upcoming', 'true');
+          } else if (activeTab === 'past') {
+            params.append('past', 'true');
+          }
+
+          // Add filter params if set
+          if (container.dataset.filterLocationId) params.append('locationId', container.dataset.filterLocationId);
+          if (container.dataset.filterCountry) params.append('country', container.dataset.filterCountry);
+          if (container.dataset.filterCategoryId) params.append('categoryId', container.dataset.filterCategoryId);
+          if (container.dataset.filterSubcategoryId) params.append('subcategoryId', container.dataset.filterSubcategoryId);
+          if (container.dataset.filterType) params.append('type', container.dataset.filterType);
+          if (container.dataset.filterLeadSource) params.append('leadSource', container.dataset.filterLeadSource);
+          if (container.dataset.sortOrder) params.append('sort', container.dataset.sortOrder);
+        } else if (componentType === 'live-sports-subcategories') {
+          // Handle sports subcategories specific parameters
+          if (container.dataset.categoryId) params.append('categoryId', container.dataset.categoryId);
+          // Pass selected subcategory IDs to fetch specific ones
+          const selectedIds = container.dataset.selectedSubcategories;
+          if (selectedIds) {
+            params.append('ids', selectedIds);
+          }
+        } else {
+          // For non-events components, use the old upcoming attribute
+          if (container.dataset.upcoming === 'true') params.append('upcoming', 'true');
+          if (container.dataset.ids) params.append('ids', container.dataset.ids);
+          if (container.dataset.categoryId) params.append('categoryId', container.dataset.categoryId);
+        }
+
+        const queryString = params.toString() ? '?' + params.toString() : '';
         const fetchUrl = API_URL + '/' + endpoint + queryString;
         console.log('[WebBuilder Hydration] Fetching:', fetchUrl);
 
         try {
+          // For events component, also fetch filter options if filters are shown
+          let filterOptions = null;
+          if (componentType === 'live-events' && container.dataset.showFilters !== 'false') {
+            try {
+              const filterResponse = await fetch(API_URL + '/events/filters/options');
+              if (filterResponse.ok) {
+                const filterResult = await filterResponse.json();
+                filterOptions = filterResult.data || null;
+              }
+            } catch (filterError) {
+              console.warn('[WebBuilder Hydration] Could not fetch filter options:', filterError.message);
+            }
+          }
+
           const response = await fetch(fetchUrl);
           console.log('[WebBuilder Hydration] Response status:', response.status, response.statusText);
 
@@ -2550,7 +2988,12 @@
           }
 
           const result = await response.json();
-          const data = result.data || result;
+          let data = result.data || result;
+
+          // Attach filter options to data for events renderer
+          if (componentType === 'live-events' && filterOptions) {
+            data = { data: Array.isArray(data) ? data : data.data || data, filterOptions: filterOptions };
+          }
 
           console.log('[WebBuilder Hydration] Received data for', componentType, ':', data);
 
@@ -2558,7 +3001,7 @@
           container.classList.remove('loading');
           container.classList.add('loaded');
 
-          if (CONFIG.debug) console.log('[WebBuilder Hydration] Hydrated:', componentType, 'with', Array.isArray(data) ? data.length : 1, 'items');
+          if (CONFIG.debug) console.log('[WebBuilder Hydration] Hydrated:', componentType, 'with', Array.isArray(data) ? data.length : (data.data ? data.data.length : 1), 'items');
         } catch (error) {
           console.error('[WebBuilder Hydration] Error for', componentType, ':', error.message);
           console.error('[WebBuilder Hydration] Attempted URL:', fetchUrl);
@@ -2751,6 +3194,188 @@
 
       .error {
         color: #ef4444;
+      }
+
+      /* ========================================
+         RESPONSIVE STYLES - Mobile First
+         ======================================== */
+
+      /* Events grid responsive */
+      .events-grid {
+        width: 100%;
+      }
+
+      /* Filter bar responsive */
+      .events-filter-bar {
+        width: 100%;
+      }
+
+      /* Tablet (768px and below) */
+      @media (max-width: 768px) {
+        /* Dynamic component grids */
+        [data-component] {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 1rem;
+        }
+
+        .events-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 1rem;
+        }
+
+        /* Filter bar stacks */
+        .events-filter-bar {
+          flex-direction: column;
+          align-items: stretch !important;
+        }
+
+        .events-filter-bar > div {
+          width: 100%;
+        }
+
+        .events-filter-bar select {
+          width: 100%;
+          min-width: unset !important;
+        }
+
+        /* Tabs responsive */
+        .events-tabs {
+          width: 100%;
+          justify-content: center;
+        }
+
+        /* Card adjustments */
+        .dynamic-card .card-content {
+          padding: 1rem;
+        }
+
+        .dynamic-card .card-title {
+          font-size: 1rem;
+        }
+
+        .dynamic-card .card-image,
+        .event-card img {
+          height: 160px;
+        }
+
+        /* Sports cards */
+        .sports-card {
+          min-width: unset !important;
+        }
+      }
+
+      /* Mobile (480px and below) */
+      @media (max-width: 480px) {
+        /* Single column on mobile */
+        [data-component] {
+          grid-template-columns: 1fr !important;
+          gap: 1rem;
+        }
+
+        .events-grid {
+          grid-template-columns: 1fr !important;
+          gap: 1rem;
+        }
+
+        /* Full width header elements */
+        .events-header {
+          padding: 0;
+        }
+
+        .events-tabs {
+          width: 100%;
+        }
+
+        .events-tabs button {
+          flex: 1;
+          padding: 0.75rem 0.5rem !important;
+          font-size: 0.8rem !important;
+        }
+
+        /* Card content adjustments */
+        .dynamic-card {
+          border-radius: 12px;
+        }
+
+        .dynamic-card .card-content {
+          padding: 0.875rem;
+        }
+
+        .dynamic-card .card-title {
+          font-size: 0.9375rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .dynamic-card .card-description {
+          font-size: 0.8125rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .dynamic-card .card-btn {
+          width: 100%;
+          padding: 0.625rem 1rem;
+          font-size: 0.8125rem;
+        }
+
+        /* Event card specific */
+        .event-card > div:first-child {
+          height: 180px !important;
+        }
+
+        .event-card .card-content p {
+          font-size: 0.8125rem !important;
+        }
+
+        /* Days left badge */
+        .event-card span[style*="position: absolute"][style*="top: 12px"] {
+          font-size: 0.6rem !important;
+          padding: 4px 8px !important;
+        }
+
+        /* Date range overlay */
+        .event-card div[style*="position: absolute"][style*="bottom: 0"] {
+          padding: 1.5rem 0.75rem 0.75rem !important;
+        }
+
+        .event-card div[style*="position: absolute"][style*="bottom: 0"] > div {
+          font-size: 1rem !important;
+        }
+
+        /* Sports subcategory cards */
+        .sports-card > div:first-child {
+          height: 120px !important;
+        }
+
+        .sports-card h4 {
+          font-size: 0.875rem !important;
+        }
+
+        /* Filter selects */
+        .events-filter {
+          font-size: 0.8125rem !important;
+          padding: 0.625rem 0.75rem !important;
+        }
+
+        /* Filter labels */
+        .events-filter-bar label {
+          font-size: 0.6875rem !important;
+        }
+      }
+
+      /* Very small screens (360px and below) */
+      @media (max-width: 360px) {
+        .dynamic-card .card-title {
+          font-size: 0.875rem;
+        }
+
+        .events-tabs button {
+          font-size: 0.75rem !important;
+          padding: 0.5rem 0.25rem !important;
+        }
+
+        .event-card > div:first-child {
+          height: 150px !important;
+        }
       }
     </style>
 
